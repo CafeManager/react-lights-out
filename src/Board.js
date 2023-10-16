@@ -27,49 +27,118 @@ import "./Board.css";
  *
  **/
 
-function Board({ nrows, ncols, chanceLightStartsOn }) {
-  const [board, setBoard] = useState(createBoard());
+function Board({ nrows = 3, ncols = 3, chanceLightStartsOn = 0.3 }) {
+    const [board, setBoard] = useState(createBoard());
 
-  /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
-  function createBoard() {
-    let initialBoard = [];
-    // TODO: create array-of-arrays of true/false values
-    return initialBoard;
-  }
+    /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
+    function createBoard() {
+        let initialBoard = [];
 
-  function hasWon() {
-    // TODO: check the board in state to determine whether the player has won.
-    
-  }
+        for (let row = 0; row < nrows; row++) {
+            initialBoard.push([]);
+            for (let col = 0; col < ncols; col++) {
+                let booleanVal = Math.random() < chanceLightStartsOn;
 
-
-  function flipCellsAround(coord) {
-    setBoard(oldBoard => {
-      const [y, x] = coord.split("-").map(Number);
-
-      const flipCell = (y, x, boardCopy) => {
-        // if this coord is actually on board, flip it
-
-        if (x >= 0 && x < ncols && y >= 0 && y < nrows) {
-          boardCopy[y][x] = !boardCopy[y][x];
+                initialBoard[row].push(booleanVal);
+            }
         }
-      };
 
-      // TODO: Make a (deep) copy of the oldBoard
+        return initialBoard;
+    }
 
-      // TODO: in the copy, flip this cell and the cells around it
+    function hasWon() {
+        // TODO: check the board in state to determine whether the player has won.
+        for (let cellList of board) {
+            for (let cell of cellList) {
+                if (cell == true) {
+                    return false;
+                }
+            }
+        }
 
-      // TODO: return the copy
-    });
-  }
+        return true;
+    }
 
-  // if the game is won, just show a winning msg & render nothing else
+    function flipCellsAround(coord) {
+        setBoard((oldBoard) => {
+            console.log(coord);
+            const [y, x] = coord.split("-").map(Number);
 
-  // TODO
+            const flipCell = (y, x, boardCopy) => {
+                // if this coord is actually on board, flip it
 
-  // make table board
+                if (x >= 0 && x < ncols && y >= 0 && y < nrows) {
+                    boardCopy[y][x] = !boardCopy[y][x];
+                }
+            };
 
-  // TODO
+
+            let copy = oldBoard.map((cellList) => [...cellList]);
+
+            flipCell(y, x, copy);
+
+            if (y - 1 >= 0) {
+                flipCell(y - 1, x, copy);
+            }
+            if (y + 1 < ncols) {
+                flipCell(y + 1, x, copy);
+            }
+            if (x - 1 >= 0) {
+                flipCell(y, x - 1, copy);
+            }
+            if (x + 1 < nrows) {
+                flipCell(y, x + 1, copy);
+            }
+
+            return copy;
+        });
+    }
+
+    // if the game is won, just show a winning msg & render nothing else
+    if (hasWon() && board.length > 0) {
+        alert("you won!");
+    } else {
+        console.log("not yet");
+        console.log(board);
+    }
+
+
+    // make table board
+    return (
+        <div className="flex-wrapper">
+            <div>
+                <h1> Welcome to lights out! </h1>
+                <p> Remove all the white lights. </p>
+                <table className="table-center">
+                    {board.map((row, rowIndex) => {
+                        {
+                            return (
+                                <tr>
+                                    {row.map((cell, cellIndex) => (
+                                        <Cell
+                                            flipCellsAroundMe={() => {
+                                                flipCellsAround(
+                                                    `${rowIndex}-${cellIndex}`
+                                                );
+                                            }}
+                                            isLit={cell}
+                                        ></Cell>
+                                    ))}
+                                </tr>
+                            );
+                        }
+                    })}
+                </table>
+            </div>
+            <div className="footer footer-grid">
+                <div> Contact us </div>
+                <div> Hire us</div>
+                <div> Give us feedback! </div>
+                <div> Careers </div>
+            </div>
+        </div>
+    );
+
 }
 
 export default Board;
